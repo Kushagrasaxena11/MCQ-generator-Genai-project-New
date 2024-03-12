@@ -3,53 +3,45 @@ import PyPDF2
 import json
 import traceback
 
-
 def read_file(file):
-    if file.name.endswith(".pdf"):
-        try:
-            pdf_reader=PyPDF2.PdfReader(file)
-            text=""
-            for page in pdf_reader.pages:
-                text+=page.extract_text()
-            return text
-            
-        except Exception as e:
-            raise Exception("error reading the PDF file")
-        
-    elif file.name.endswith(".txt"):
-        return file.read().decode("utf-8")
-    
+    if file is None:
+        raise Exception("No file uploaded")
+
+    if hasattr(file, 'name'):  # Check if file has a 'name' attribute
+        if file.name.endswith(".pdf"):
+            try:
+                pdf_reader = PyPDF2.PdfReader(file)
+                text = ""
+                for page in pdf_reader.pages:
+                    text += page.extract_text()
+                return text
+            except Exception as e:
+                raise Exception("Error reading the PDF file")
+        elif file.name.endswith(".txt"):
+            return file.read().decode("utf-8")
+        elif file.name.endswith(".json"):
+            with open(file.name, 'r') as json_file:
+                return json.loads(json_file.read())
+        else:
+            raise Exception("Unsupported file format. Only PDF, text, and JSON files are supported.")
     else:
-        raise Exception(
-            "unsupported file format only pdf and text file suppoted"
-            
-        )
+        raise Exception("Unsupported file format. Only PDF, text, and JSON files are supported.")
 
 def get_table_data(quiz_str):
     try:
-        # convert the quiz from a str to dict
-        quiz_dict=json.loads(quiz_str)
-        quiz_table_data=[]
+        # Convert the quiz from a string to a dictionary
+        quiz_dict = json.loads(quiz_str)
+        quiz_table_data = []
         
-        # iterate over the quiz dictionary and extract the required information
-        for key,value in quiz_dict.items():
-            mcq=value["mcq"]
-            options=" || ".join(
-                [
-                    f"{option}-> {option_value}" for option, option_value in value["options"].items()
-                 
-                 ]
-            )
-            
-            correct=value["correct"]
-            quiz_table_data.append({"MCQ": mcq,"Choices": options, "Correct": correct})
+        # Iterate over the quiz dictionary and extract the required information
+        for key, value in quiz_dict.items():
+            mcq = value["mcq"]
+            options = " || ".join([f"{option}-> {option_value}" for option, option_value in value["options"].items()])
+            correct = value["correct"]
+            quiz_table_data.append({"MCQ": mcq, "Choices": options, "Correct": correct})
         
         return quiz_table_data
         
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         return False
-
-
-
-    

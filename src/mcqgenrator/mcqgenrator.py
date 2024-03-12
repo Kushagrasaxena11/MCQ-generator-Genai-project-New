@@ -11,6 +11,7 @@ import traceback
 from dotenv import load_dotenv
 import PyPDF2
 
+
 load_dotenv()
 
 key=os.getenv("OPENAI_API_KEY")
@@ -36,8 +37,8 @@ Ensure to make {number} MCQs
 """
 
 quiz_generation_prompt = PromptTemplate(
-   input_variables=["text", "number", "grade", "tone", "response_json"],
-     template=TEMPLATE)
+    input_variables=["text", "number", "grade", "tone", "RESPONSE_JSON"],
+    template=TEMPLATE)
 
 
 quiz_chain=LLMChain(llm=llm, prompt=quiz_generation_prompt, output_key="quiz", verbose=True)
@@ -61,5 +62,5 @@ review_chain=LLMChain(llm=llm, prompt=quiz_evaluation_prompt, output_key="review
 
 
 
-generate_evaluate_chain=SequentialChain(chains=[quiz_chain,review_chain],input_variables=["text", "number", "subject", "tone", "RESPONSE_JSON","response_json"],
+generate_evaluate_chain=SequentialChain(chains=[quiz_chain,review_chain],input_variables=["text", "number", "subject", "tone", "RESPONSE_JSON"],
                                         output_variables=["quiz", "review"], verbose=True,)
